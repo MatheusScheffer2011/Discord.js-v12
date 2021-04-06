@@ -1,22 +1,29 @@
-const Discord = require("discord.js");
+const Discord = require('discord.js')
+const moment = require('moment')
+moment.locale("pt-BR");
+module.exports = {
+    name: "emojiinfo",
+    async run(client, message, args) {
+        let emojiName = args.join(" ");
+        let emoji = message.guild.emojis.cache.get(args[0]) || message.guild.emojis.cache.find(emoji => emoji.name === `${emojiName}`) 
+        if (!args[0]) return message.channel.send("Por favor, me dê o nome ou id do emoji")
+        if (!emoji) return message.channel.send("Por favor, me dê um nome ou id **valido**")
+        let xd;
+        if(emoji.animated) xd = "Sim"
+        if(!emoji.animated) xd = 'Não'
+        let embed = new Discord.MessageEmbed()
 
-module.exports.run = async (client, message, args) => {
-  message.delete();
-  if (!args[0])
-    return message.channel.send(
-      `**${message.author.username}, a sintaxe correta é:** ` +
-        "`" +
-        "m!emoji nomedoemoji`"
-    ); //Troque a exclamação ! da mensagem acima pelo seu prefixo
-  let emoji = message.guild.emojis.cache.find(emoji => emoji.name === args[0]);
+            .addField("Nome", `${emoji.name}`)
+            .addField("id do emoji", `${emoji.id}`)
+            .addField("Emoji", `${emoji}`)
+            .addField("Criado em", `${moment(emoji.createdTimestamp).format('LT')} ${moment(emoji.createdTimestamp).format('LL')} ${moment(emoji.createdTimestamp).fromNow()}`)
+            .addField("Servidor", message.guild.name)
+            .addField("Animado?", xd)
+            .setThumbnail(emoji.url)
+            .setColor("BLUE")
+            .addField("Formato", `\`<:${emoji.name}:${emoji.id}>\``)
+            .addField("URL", `[clique aqui](${emoji.url})`)
 
-  if (!emoji) {
-    message.channel.send(
-      "`" + args[0] + "` **não é um emoji deste servidor.**"
-    );
-  } else if (emoji.animated === true) {
-    message.channel.send(`<a:${args[0]}:${emoji.id}>`);
-  } else {
-    message.channel.send(`<:${args[0]}:${emoji.id}>`);
-  }
-};
+        message.channel.send(embed)
+    }
+}
